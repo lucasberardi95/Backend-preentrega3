@@ -44,7 +44,7 @@ app.use(session({ //Configuracion de la sesion de mi app
     store: MongoStore.create({
         mongoUrl:process.env.MONGO_URL,
         mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
-        ttl: 60 // (Esto es en segundos,  no milisegundos)
+        ttl: 60 * 60 // (Esto es en segundos,  no milisegundos)
     }),
     secret: process.env.SESSION_SECRET,
     resave: true,

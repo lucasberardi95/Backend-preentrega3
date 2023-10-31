@@ -1,6 +1,7 @@
 import cartModel from "../models/carts.models.js"
 import productModel from "../models/products.models.js"
 import ticketModel from "../models/ticket.models.js"
+import { userModel } from "../models/users.models.js"
 import mongoose from "mongoose"
 
 export const getCarts = async (req, res) => {
@@ -137,11 +138,11 @@ export const emptyCart = async (req, res) => {
 export const purchase = async (req, res) => {
     const { cid } = req.params
     try {
-        if (!req.session.user || !req.session.user.email) {
-            return res.status(401).send({ error: 'User is not authenticated' })
-        }
         const cart = await cartModel.findById(cid)
         const products = await productModel.find()
+        const user = await userModel.find({ cart: cart._id})
+        const purchaserEmail = user[0].email
+
         if (!cart) {
             return res.status(404).send({ result: 'Cart not found', message: cart })
         }
@@ -162,25 +163,24 @@ export const purchase = async (req, res) => {
 
         const results = await Promise.all(promises)
         const prodsToPurchase = results.filter((result) => result !== null)
+        console.log(`Products to purchase: ${JSON.stringify(prodsToPurchase)}`)
 
         if (prodsToPurchase.length === 0) {
             return res.status(400).send({ result: 'No products to purchase' })
         }
-
-        const purchaserEmail = req.session.user.email
 
         const purchase = {
             items: prodsToPurchase,
             total: prodsToPurchase.reduce((acc, product) => {
                 return acc + product.price * product.quantity
             }, 0),
-        };
+        }
 
-        const ticket = new ticketModel({
+        const ticket = {
             amount: purchase.total,
             purchaser: purchaserEmail
-        })
-        await ticket.save()
+        }
+        await ticketModel.create(ticket)
         await cartModel.findByIdAndUpdate(cid, { products: [] })
         return res.status(200).send({ message: "Successful purchase" })
     } catch (error) {
