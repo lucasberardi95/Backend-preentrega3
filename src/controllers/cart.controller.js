@@ -181,6 +181,7 @@ export const purchase = async (req, res) => {
             purchaser: purchaserEmail
         }
         await ticketModel.create(ticket)
+        console.log(`Successful purchase, your total to pay is: $${ticket.amount}`)
         await cartModel.findByIdAndUpdate(cid, { products: [] })
         return res.status(200).send({ message: "Successful purchase" })
     } catch (error) {
