@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
 //MongoDB Atlas connection
 mongoose.connect(process.env.MONGO_URL)
     .then(async () => {
-        console.log('DB connected')
+        console.log('MongoDB connected')
     })
     .catch((error) => console.log(`Error connecting to MongoDB Atlas: ${error}`))
 
